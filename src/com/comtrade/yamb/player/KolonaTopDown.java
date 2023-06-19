@@ -1,0 +1,148 @@
+package com.comtrade.yamb.player;
+
+import com.comtrade.yamb.Constants;
+import com.comtrade.yamb.Die;
+import com.comtrade.yamb.FieldData;
+import com.comtrade.yamb.Request;
+
+public class KolonaTopDown {
+	private static int score = 0;
+		
+		public static int getScore() {
+			return score;
+		}
+		
+		private static int polje=-1;
+		
+	
+	//	public void setScore(int score) {
+	//		this.score = score;
+	//	}
+	
+		public static int getPolje() {
+			return polje;
+		}
+
+	public static PlayerResponse play(Request request) {
+
+		Die[] kockice = request.getDice();
+		int[] brojeviNaKockicama = Patterns.dieToInt(kockice);
+		boolean[] cuvanjeKockica = new boolean[Constants.DICE_COUNT];
+
+		int[] ucestalostKockica = Patterns.ucestalostBrojeva(brojeviNaKockicama);
+
+		int brojKojiSeNajvisePonavlja = Patterns.brojKojiSeNajvisePonavlja(brojeviNaKockicama);
+
+		for (int i = 0; i < Constants.DICE_COUNT; i++) {
+
+			if (kockice[i].getValue() == brojKojiSeNajvisePonavlja) {
+				cuvanjeKockica[i] = true;
+			} else {
+				cuvanjeKockica[i] = false;
+			}
+
+		}
+		
+		//Popunjavanje kolona 1 do 6
+		if (ucestalostKockica[Patterns.vrednostMaxMetode(brojeviNaKockicama)]>=2) 
+		{
+			
+			for(int i=0; i<Constants.DICE_COUNT; i++)
+			{	
+
+			if (brojKojiSeNajvisePonavlja == i+1)// proveravamo da li je index broj 1
+			{
+				if (request.getBoard().getColumns()[0].getFields().get(i).isPlayable() == true) {
+					PlayerResponse response = new PlayerResponse(false, cuvanjeKockica,
+							new FieldData(Konstante.KOLONA_TOPDOWN, i));
+					return response;
+				}
+			}
+			
+			}
+			//MAX KOLONA
+			if(Patterns.poljeMax(kockice) == true)
+			{
+				if (request.getBoard().getColumns()[0].getFields().get(7).isPlayable()) 
+				{
+				PlayerResponse response = new PlayerResponse(true, cuvanjeKockica,
+						new FieldData(Konstante.KOLONA_TOPDOWN, Konstante.MAX));
+				return response;
+				}
+			}
+			else if(Patterns.poljeMin(kockice) == true)
+			{
+				if (request.getBoard().getColumns()[0].getFields().get(8).isPlayable()) 
+				{
+				PlayerResponse response = new PlayerResponse(true, cuvanjeKockica,
+						new FieldData(Konstante.KOLONA_TOPDOWN, Konstante.MIN));
+				return response;
+				}
+			}
+			//KENTA
+			else if (Patterns.ImamoLiKenta(brojeviNaKockicama) == true) 
+			{
+				if (request.getBoard().getColumns()[0].getFields().get(10).isPlayable()) 
+				{
+				PlayerResponse response = new PlayerResponse(true, cuvanjeKockica,
+						new FieldData(Konstante.KOLONA_TOPDOWN, Konstante.KENTA));
+				return response;
+				}
+			} 
+			//TRILING
+			else if (ucestalostKockica[Patterns.vrednostMaxMetode(brojeviNaKockicama)] == 3) {
+				if (request.getBoard().getColumns()[0].getFields().get(11).isPlayable()) 
+				{
+				PlayerResponse response = new PlayerResponse(true, cuvanjeKockica,
+						new FieldData(Konstante.KOLONA_TOPDOWN, Konstante.TRILING));
+				return response;
+				}
+			}	
+			//FULL HOUSE
+			else if (Patterns.najavaImamoLiFullHouse(brojeviNaKockicama) == true) 
+			{
+				if(Patterns.ImamoLiFullHouse(brojeviNaKockicama) == true)
+				{
+					if (request.getBoard().getColumns()[0].getFields().get(12).isPlayable()) 
+					{
+						PlayerResponse response = new PlayerResponse(true, cuvanjeKockica,
+								new FieldData(Konstante.KOLONA_TOPDOWN, Konstante.FULL));
+						return response;
+					}
+				}
+				else if(request.getBoard().getColumns()[0].getFields().get(12).isPlayable()) 
+				{
+					PlayerResponse response = new PlayerResponse(true, cuvanjeKockica,
+							new FieldData(Konstante.KOLONA_TOPDOWN, Konstante.FULL));
+					return response;
+				}
+			}	
+			
+			//POKER
+			else if(ucestalostKockica[Patterns.vrednostMaxMetode(brojeviNaKockicama)] == 4) 
+			{
+				if (request.getBoard().getColumns()[0].getFields().get(13).isPlayable()) 
+				{
+				PlayerResponse response = new PlayerResponse(true, cuvanjeKockica,
+						new FieldData(Konstante.KOLONA_TOPDOWN, Konstante.POKER));
+				return response;
+				}
+			} 
+			
+			//YAMB
+			if (ucestalostKockica[Patterns.vrednostMaxMetode(brojeviNaKockicama)] == 5) 
+			{
+				if (request.getBoard().getColumns()[0].getFields().get(14).isPlayable()) 
+				{
+					PlayerResponse response = new PlayerResponse(true, cuvanjeKockica,
+							new FieldData(Konstante.KOLONA_TOPDOWN, Konstante.YAMB));
+					return response;
+				}
+				
+			}
+
+		}
+		return null;
+
+	}
+}
